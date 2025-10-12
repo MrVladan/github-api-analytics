@@ -10,7 +10,7 @@ token = os.getenv("GITHUB_TOKEN")
 # Poveži se na GitHub
 g = Github(token)
 
-# Izaberi repozitorijum (menjaj ako hoćeš drugi repo)
+# Izaberi repozitorijum (menjam ako hoću drugi repo)
 repo_name = "MrVladan/github-api-analytics"
 repo = g.get_repo(repo_name)
 
@@ -30,7 +30,7 @@ contributors_data = repo.get_contributors()
 contributors_count = repo.get_contributors().totalCount
 print(f"🔹 Broj contributors: {contributors_count}")
 
-# ----- 📊 Pie chart: Issues -----
+    # ----- 📊 Pie chart: Issues -----
 if open_issues + closed_issues > 0:
     labels = ["Otvoreni", "Zatvoreni"]
     sizes = [open_issues, closed_issues]
@@ -60,3 +60,34 @@ plt.ylabel("Broj commit-a")
 plt.title(f"Doprinos po contributor-ima za {repo_name}")
 plt.savefig("contributors_activity.png")
 print("📈 Graf contributors_activity.png sačuvan.")
+
+# --- Mesečna aktivnost commit-ova -> commits_activity.png ---
+import matplotlib.pyplot as plt
+from collections import Counter
+from datetime import datetime
+
+commit_dates = []
+for c in commits:
+    try:
+        dt = c.commit.author.date
+        ym = dt.strftime("%Y-%m")
+        commit_dates.append(ym)
+    except Exception:
+        continue
+
+if commit_dates:
+    counts = Counter(commit_dates)
+    months = sorted(counts.keys())
+    values = [counts[m] for m in months]
+
+    plt.figure(figsize=(9, 5))
+    plt.bar(months, values)
+    plt.xlabel("Mesec")
+    plt.ylabel("Broj commit-ova")
+    plt.title(f"Commit aktivnost po mesecima – {repo_name}")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.savefig("commits_activity.png")
+    print("📈 Graf commits_activity.png sačuvan.")
+else:
+    print("ℹ️ Nema podataka za mesečni graf commit-ova (repo bez commit-a?).")
